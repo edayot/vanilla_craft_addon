@@ -72,15 +72,16 @@ def loot_table(id,count):
 
 def main():
 	recipes=os.listdir("recipes")
+	#recipes=["acacia_boat.json"]
 
-	with open("data/vanilla_craft_addon/functions/recipes.mcfunction","w") as f:
+	with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/functions/recipes.mcfunction","w") as f:
 		for r in recipes:
 			a=create_craft(r)
 			if not a is None:
 				recipe,result,count=a
 				#create the loot_table
 				table=loot_table(result,count)
-				with open("data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
+				with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
 					json.dump(table,g,indent=4)
 				#create the command
 				recipe_command=str(recipe)
@@ -90,7 +91,7 @@ def main():
 				recipe_command=recipe_command.replace("\'0\'","0")
 				recipe_command=recipe_command.replace("\'1\'","1")
 				recipe_command=recipe_command.replace("\'2\'","2")
-				recipe_command=recipe_command.replace(":0,",":0b,")
-				recipe_command=recipe_command.replace(":1,",":1b,")
-				recipe_command=recipe_command.replace(":2,",":2b,")
+				recipe_command=recipe_command.replace(": 0,",":0b,")
+				recipe_command=recipe_command.replace(": 1,",":1b,")
+				recipe_command=recipe_command.replace(": 2,",":2b,")
 				f.write(command_start+recipe_command+command_end+"vanilla_craft_addon:"+str(result).replace("minecraft:","")+"_"+str(count)+"\n")

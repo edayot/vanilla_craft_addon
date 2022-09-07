@@ -45,7 +45,30 @@ def create_craft(r):
 				count=data["result"]["count"]
 			except:
 				pass
-			return recipe,result,count,len(data["pattern"])
+			return "shaped",recipe,result,count,len(data["pattern"])
+		elif data["type"]=="minecraft:crafting_shapeless":
+			recipe=[]
+			for i in range(len(data["ingredients"])):
+				try:
+					try:
+						recipe.append({"id":data["ingredients"][i]["item"],"Count":data["ingredients"][i]["count"]})
+					except:
+						recipe.append({"id":data["ingredients"][i]["item"],"Count":1})
+				except:
+					try:
+						recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":data["ingredients"][i]["count"]})
+					except:
+						recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":1})
+			result=data["result"]["item"]
+			count=1
+			try:
+				count=data["result"]["count"]
+			except:
+				pass
+			return "shapeless",recipe,result,count
+
+
+
 
 def loot_table(id,count):
 	table={
@@ -70,42 +93,74 @@ def loot_table(id,count):
 	return table
 
 def main():
+	#recipes=["flint_and_steel.json"]
+
 	recipes=os.listdir("recipes")
-	#recipes=["acacia_boat.json"]
 
 	with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/functions/recipes.mcfunction","w") as f:
-		for r in recipes:
-			a=create_craft(r)
-			command_start="execute store result score @s smithed.data if entity @s[scores={smithed.data=0}] if data storage smithed.crafter:input recipe"
-			command_end=" run loot replace block ~ ~ ~ container.16 loot "
-			if not a is None:
-				recipe,result,count,recipe_type=a
-				#create the loot_table
-				table=loot_table(result,count)
-				with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
-					json.dump(table,g,indent=4)
-				#create the command
-				recipe_command=str(recipe)
+		with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/functions/shapeless_recipes.mcfunction","w") as f2:
+			for r in recipes:
+				a=create_craft(r)
+				
+					
+				
+				if not a is None:
+					if a[0]=="shaped":
+						command_start="execute store result score @s smithed.data if entity @s[scores={smithed.data=0}] if data storage smithed.crafter:input recipe"
+						command_end=" run loot replace block ~ ~ ~ container.16 loot "
+						bonjour,recipe,result,count,recipe_type=a
+						#create the loot_table
+						#create the command
+						recipe_command=str(recipe)
 
-				if recipe_type==2:
-					del recipe["2"]
-					recipe_command=str(recipe)
-					command_end=" if data storage smithed.crafter:input recipe{2:[]}"+command_end
+						if recipe_type==2:
+							del recipe["2"]
+							recipe_command=str(recipe)
+							command_end=" if data storage smithed.crafter:input recipe{2:[]}"+command_end
 
-				elif recipe_type==1:
-					del recipe["2"]
-					del recipe["1"]
-					recipe_command=str(recipe)
-					command_end=" if data storage smithed.crafter:input recipe{1:[],2:[]}"+command_end
+						elif recipe_type==1:
+							del recipe["2"]
+							del recipe["1"]
+							recipe_command=str(recipe)
+							command_end=" if data storage smithed.crafter:input recipe{1:[],2:[]}"+command_end
+						
+						table=loot_table(result,count)
+						with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
+							json.dump(table,g,indent=4)
+						recipe_command=recipe_command.replace("\'Slot\'","Slot")
+						recipe_command=recipe_command.replace("\'id\'","id")
+						recipe_command=recipe_command.replace("\'item_tag\'","item_tag")
+						recipe_command=recipe_command.replace("\'0\'","0")
+						recipe_command=recipe_command.replace("\'1\'","1")
+						recipe_command=recipe_command.replace("\'2\'","2")
+
+						for i in range(64):
+							recipe_command=recipe_command.replace(": SSS,".replace("SSS",str(i)),":SSSb,".replace("SSS",str(i)))
+						
+						f.write(command_start+recipe_command+command_end+"vanilla_craft_addon:"+str(result).replace("minecraft:","")+"_"+str(count)+"\n")
 
 
-				recipe_command=recipe_command.replace("\'Slot\'","Slot")
-				recipe_command=recipe_command.replace("\'id\'","id")
-				recipe_command=recipe_command.replace("\'item_tag\'","item_tag")
-				recipe_command=recipe_command.replace("\'0\'","0")
-				recipe_command=recipe_command.replace("\'1\'","1")
-				recipe_command=recipe_command.replace("\'2\'","2")
-				recipe_command=recipe_command.replace(": 0,",":0b,")
-				recipe_command=recipe_command.replace(": 1,",":1b,")
-				recipe_command=recipe_command.replace(": 2,",":2b,")
-				f.write(command_start+recipe_command+command_end+"vanilla_craft_addon:"+str(result).replace("minecraft:","")+"_"+str(count)+"\n")
+					elif a[0]=="shapeless":
+						command_start="execute store result score @s smithed.data if entity @s[scores={smithed.data=0}] if score count smithed.data matches 2 if data storage smithed.crafter:input {recipe:"
+						command_end="} run loot replace block ~ ~ ~ container.16 loot "
+
+						bonjour,recipe,result,count=a
+						recipe_command=str(recipe)
+
+
+						table=loot_table(result,count)
+						with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
+							json.dump(table,g,indent=4)
+						recipe_command=recipe_command.replace("\'Slot\'","Slot")
+						recipe_command=recipe_command.replace("\'id\'","id")
+						recipe_command=recipe_command.replace("\'item_tag\'","item_tag")
+						recipe_command=recipe_command.replace("\'0\'","0")
+						recipe_command=recipe_command.replace("\'1\'","1")
+						recipe_command=recipe_command.replace("\'2\'","2")
+
+						for i in range(64):
+							recipe_command=recipe_command.replace(": SSS,".replace("SSS",str(i)),":SSSb,".replace("SSS",str(i)))
+						
+						f2.write(command_start+recipe_command+command_end+"vanilla_craft_addon:"+str(result).replace("minecraft:","")+"_"+str(count)+"\n")
+
+

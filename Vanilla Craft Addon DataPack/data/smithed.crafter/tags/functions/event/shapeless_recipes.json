@@ -1,5 +1,6 @@
 {
     "values":[
-        "vanilla_craft_addon:shapeless_recipes"
+        "vanilla_craft_addon:shapeless_recipes",
+        "vanilla_craft_addon:shapeless_special"
     ]
 }

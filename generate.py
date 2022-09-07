@@ -49,16 +49,23 @@ def create_craft(r):
 		elif data["type"]=="minecraft:crafting_shapeless":
 			recipe=[]
 			for i in range(len(data["ingredients"])):
+				print(r)
 				try:
 					try:
-						recipe.append({"id":data["ingredients"][i]["item"],"Count":data["ingredients"][i]["count"]})
+						try:
+							recipe.append({"id":data["ingredients"][i]["item"],"Count":data["ingredients"][i]["count"]})
+						except:
+							recipe.append({"id":data["ingredients"][i]["item"],"Count":1})
 					except:
-						recipe.append({"id":data["ingredients"][i]["item"],"Count":1})
+						try:
+							recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":data["ingredients"][i]["count"]})
+						except:
+							recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":1})
 				except:
-					try:
-						recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":data["ingredients"][i]["count"]})
-					except:
-						recipe.append({"item_tag":[data["ingredients"][i]["tag"]],"Count":1})
+					if type(data["ingredients"][i])==list:
+						if data["ingredients"][i]==[{"item": "minecraft:coal"},{"item": "minecraft:charcoal"}]:
+							recipe.append({"item_tag":"vanilla_craft_addon:coal","Count":1})
+				
 			result=data["result"]["item"]
 			count=1
 			try:
@@ -93,7 +100,7 @@ def loot_table(id,count):
 	return table
 
 def main():
-	#recipes=["flint_and_steel.json"]
+	recipes=["flint_and_steel.json"]
 
 	recipes=os.listdir("recipes")
 
@@ -141,16 +148,19 @@ def main():
 
 
 					elif a[0]=="shapeless":
-						command_start="execute store result score @s smithed.data if entity @s[scores={smithed.data=0}] if score count smithed.data matches 2 if data storage smithed.crafter:input {recipe:"
+						command_start="execute store result score @s smithed.data if entity @s[scores={smithed.data=0}] if score count smithed.data matches XXX if data storage smithed.crafter:input {recipe:"
 						command_end="} run loot replace block ~ ~ ~ container.16 loot "
 
 						bonjour,recipe,result,count=a
 						recipe_command=str(recipe)
 
+						command_start=command_start.replace("XXX",str(len(recipe)))
 
 						table=loot_table(result,count)
 						with open("Vanilla Craft Addon DataPack/data/vanilla_craft_addon/loot_tables/"+str(result).replace("minecraft:","")+"_"+str(count)+".json","w") as g:
 							json.dump(table,g,indent=4)
+
+						recipe_command=recipe_command.replace("\'Count\'","Count")
 						recipe_command=recipe_command.replace("\'Slot\'","Slot")
 						recipe_command=recipe_command.replace("\'id\'","id")
 						recipe_command=recipe_command.replace("\'item_tag\'","item_tag")
@@ -159,7 +169,7 @@ def main():
 						recipe_command=recipe_command.replace("\'2\'","2")
 
 						for i in range(64):
-							recipe_command=recipe_command.replace(": SSS,".replace("SSS",str(i)),":SSSb,".replace("SSS",str(i)))
+							recipe_command=recipe_command.replace(": SSS".replace("SSS",str(i)),":SSSb".replace("SSS",str(i)))
 						
 						f2.write(command_start+recipe_command+command_end+"vanilla_craft_addon:"+str(result).replace("minecraft:","")+"_"+str(count)+"\n")
 

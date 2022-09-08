@@ -27,6 +27,10 @@ def create_craft(r):
 								item_tag=data["key"][data["pattern"][i][j]]["tag"]
 							except:
 								item_id="minecraft:air"
+								if type(data["key"][data["pattern"][i][j]])==list:
+									item_id=None
+									if data["key"][data["pattern"][i][j]]==[{"item": "minecraft:coal"},{"item": "minecraft:charcoal"}]:
+										item_tag="minecraft:coals"
 					else:
 						item_id="minecraft:air"
 					if not item_id is None:
@@ -64,7 +68,7 @@ def create_craft(r):
 				except:
 					if type(data["ingredients"][i])==list:
 						if data["ingredients"][i]==[{"item": "minecraft:coal"},{"item": "minecraft:charcoal"}]:
-							recipe.append({"item_tag":"vanilla_craft_addon:coal","Count":1})
+							recipe.append({"item_tag":["#minecraft:coals"],"Count":1})
 				
 			result=data["result"]["item"]
 			count=1
@@ -100,7 +104,7 @@ def loot_table(id,count):
 	return table
 
 def main():
-	recipes=["flint_and_steel.json"]
+	recipes=["torch.json"]
 
 	recipes=os.listdir("recipes")
 
